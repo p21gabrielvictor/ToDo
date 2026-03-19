@@ -1,54 +1,57 @@
-import { TbClipboardText } from "react-icons/tb";
-import { ITask } from "../../App";
+import { Droppable } from "@hello-pangea/dnd";
+import { ITask, TaskStatus } from "../../App";
 import { Task } from "../Task";
 import styles from "./tasks.module.css";
 
 interface Props {
   tasks: ITask[];
-  onComplete: (taskId: string) => void;
   onDelete: (taskId: string) => void;
+  onMoveTask: (taskId: string, newStatus: TaskStatus) => void;
 }
 
-export function Tasks({ tasks, onComplete, onDelete }: Props) {
-  const tasksQuantity = tasks.length;
-  const completedTasks = tasks.filter((task) => task.isCompleted).length;
+const COLUMNS: { id: TaskStatus; label: string }[] = [
+  { id: "To Do", label: "To Do" },
+  { id: "Doing", label: "Doing" },
+  { id: "Pendente", label: "Pendente" },
+  { id: "Done", label: "Done" },
+];
 
+export function Tasks({ tasks, onDelete, onMoveTask }: Props) {
   return (
-    <section className={styles.tasks}>
-      <header className={styles.header}>
-        <div>
-          <p>Tarefas criadas</p>
-          <span>{tasksQuantity}</span>
-        </div>
+    <div className={styles.tasks}>
+      <div className={styles.kanbanBoard}>
+        {COLUMNS.map((column) => (
+          <div key={column.id} className={styles.column}>
+            <header className={styles.columnHeader}>
+              <p>{column.label}</p>
+              <span>{tasks.filter((t) => t.status === column.id).length}</span>
+            </header>
 
-        <div>
-          <p className={styles.textPurple}>Concluídas</p>
-          <span>
-            {completedTasks} de {tasksQuantity}
-          </span>
-        </div>
-      </header>
-
-      <div className={styles.list}>
-        {tasks.map((task) => (
-          <Task
-            key={task.id}
-            task={task}
-            onComplete={onComplete}
-            onDelete={onDelete}
-          />
+            <Droppable droppableId={column.id}>
+              {(provided) => (
+                <div 
+                  className={styles.columnList} 
+                  {...provided.droppableProps} 
+                  ref={provided.innerRef}
+                >
+                  {tasks
+                    .filter((t) => t.status === column.id)
+                    .map((task, index) => (
+                      <Task 
+                        key={task.id} 
+                        index={index} 
+                        task={task} 
+                        onDelete={onDelete} 
+                        onMoveTask={onMoveTask} 
+                      />
+                    ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </div>
         ))}
-
-        {tasks.length <= 0 && (
-          <section className={styles.empty}>
-            <TbClipboardText size={50} />
-            <div>
-              <p>Você ainda não tem tarefas cadastradas</p>
-              <span>Crie tarefas e organize seus itens a fazer</span>
-            </div>
-          </section>
-        )}
       </div>
-    </section>
+    </div>
   );
 }

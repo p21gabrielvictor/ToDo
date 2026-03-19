@@ -1,32 +1,34 @@
 import { TbTrash } from "react-icons/tb";
-import { BsFillCheckCircleFill } from "react-icons/bs";
-
+import { Draggable } from "@hello-pangea/dnd";
+import { ITask, TaskStatus } from "../../App";
 import styles from "./task.module.css";
-import { ITask } from "../../App";
 
 interface Props {
   task: ITask;
-  onComplete: (taskId: string) => void;
+  index: number;
   onDelete: (taskId: string) => void;
+  onMoveTask: (taskId: string, newStatus: TaskStatus) => void;
 }
 
-export function Task({ task, onComplete, onDelete }: Props) {
+export function Task({ task, index, onDelete, onMoveTask }: Props) {
   return (
-    <div className={styles.task}>
-      <button
-        className={styles.checkContainer}
-        onClick={() => onComplete(task.id)}
-      >
-        {task.isCompleted ? <BsFillCheckCircleFill /> : <div />}
-      </button>
+    <Draggable draggableId={task.id} index={index}>
+      {(provided) => (
+        <div
+          className={styles.task}
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+        >
+          <p className={task.status === "Done" ? styles.textCompleted : ""}>
+            {task.title}
+          </p>
 
-      <p className={task.isCompleted ? styles.textCompleted : ""}>
-        {task.title}
-      </p>
-
-      <button className={styles.deleteButton} onClick={() => onDelete(task.id)}>
-        <TbTrash size={20} />
-      </button>
-    </div>
+          <button className={styles.deleteButton} onClick={() => onDelete(task.id)}>
+            <TbTrash size={20} />
+          </button>
+        </div>
+      )}
+    </Draggable>
   );
 }

@@ -1,27 +1,25 @@
 import { useEffect, useState } from "react";
+import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { Header } from "./components/Header";
 import { Tasks } from "./components/Tasks";
 
 const LOCAL_STORAGE_KEY = "todo:savedTasks";
 
+// 1. Definição dos tipos (Essenciais para os outros arquivos)
+export type TaskStatus = "To Do" | "Doing" | "Pendente" | "Done";
+
 export interface ITask {
   id: string;
   title: string;
-  isCompleted: boolean;
+  status: TaskStatus;
 }
 
 function App() {
   const [tasks, setTasks] = useState<ITask[]>([]);
 
-  function loadSavedTasks() {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (saved) {
-      setTasks(JSON.parse(saved));
-    }
-  }
-
   useEffect(() => {
-    loadSavedTasks();
+    const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (saved) setTasks(JSON.parse(saved));
   }, []);
 
   function setTasksAndSave(newTasks: ITask[]) {
@@ -32,41 +30,29 @@ function App() {
   function addTask(taskTitle: string) {
     setTasksAndSave([
       ...tasks,
-      {
-        id: crypto.randomUUID(),
-        title: taskTitle,
-        isCompleted: false,
-      },
+      { id: crypto.randomUUID(), title: taskTitle, status: "To Do" },
     ]);
   }
 
   function deleteTaskById(taskId: string) {
-    const newTasks = tasks.filter((task) => task.id !== taskId);
-    setTasksAndSave(newTasks);
+    setTasksAndSave(tasks.filter((task) => task.id !== taskId));
   }
 
-  function toggleTaskCompletedById(taskId: string) {
-    const newTasks = tasks.map((task) => {
-      if (task.id === taskId) {
-        return {
-          ...task,
-          isCompleted: !task.isCompleted,
-        };
-      }
-      return task;
-    });
-    setTasksAndSave(newTasks);
+  function moveTask(taskId: string, newStatus: TaskStatus) {
+    setTasksAndSave(tasks.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)));
+  }
+
+  function onDragEnd(result: DropResult) {
+    const { destination, draggableId } = result;
+    if (!destination) return;
+    moveTask(draggableId, destination.droppableId as TaskStatus);
   }
 
   return (
-    <>
+    <DragDropContext onDragEnd={onDragEnd}>
       <Header onAddTask={addTask} />
-      <Tasks
-        tasks={tasks}
-        onDelete={deleteTaskById}
-        onComplete={toggleTaskCompletedById}
-      />
-    </>
+      <Tasks tasks={tasks} onDelete={deleteTaskById} onMoveTask={moveTask} />
+    </DragDropContext>
   );
 }
 

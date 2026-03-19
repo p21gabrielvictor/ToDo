@@ -30,3 +30,58 @@
   button {
     cursor: pointer;
   }
+  /* Exemplo de estrutura no CSS */
+.kanban-container {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto; /* Permite scroll horizontal se tiver muitas colunas */
+  padding: 1rem;
+}
+
+.kanban-column {
+  flex: 1;
+  min-width: 250px;
+  background: #1a1a1a; /* Mantendo o dark mode da imagem */
+  border-radius: 8px;
+  padding: 1rem;
+}
+.kanbanBoard {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding-bottom: 2rem;
+  overflow-x: auto; /* Para não quebrar em telas menores */
+  align-items: flex-start;
+}
+
+.column {
+  flex: 1;
+  min-width: 280px;
+  background: #262626; /* Um pouco mais claro que o fundo principal */
+  border-radius: 8px;
+  padding: 1rem;
+  min-height: 400px;
+}
+
+.columnTitle {
+  font-size: 0.875rem;
+  color: #4ea8de;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.columnList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.emptyColumn {
+  border: 1px dashed #333;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  color: #808080;
+  font-size: 0.75rem;
+}
